@@ -102,6 +102,7 @@ class select_support_mcl : public select_support
         select_support_mcl<t_b, t_pat_len>& operator=(const select_support_mcl& ss);
         select_support_mcl<t_b, t_pat_len>& operator=(select_support_mcl&&);
         void swap(select_support_mcl<t_b, t_pat_len>& ss);
+        size_type bit_size() const;
 };
 
 
@@ -490,6 +491,18 @@ void select_support_mcl<t_b,t_pat_len>::load(std::istream& in, const bit_vector*
                 m_miniblock[i].load(in);
             }
     }
+}
+
+template<uint8_t t_b, uint8_t t_pat_len>
+auto select_support_mcl<t_b,t_pat_len>::bit_size() const -> size_type
+{
+    const size_type SUPER_BLOCK_SIZE = 4096;
+    const size_type sb = (m_arg_cnt+SUPER_BLOCK_SIZE-1)/SUPER_BLOCK_SIZE; // number of superblocks
+    size_type s = m_superblock.bit_size();
+    for (size_type i=0; i < sb; ++i) s += m_miniblock[i].bit_size();
+    if (m_longsuperblock != nullptr)
+        for (size_type i=0; i < sb; ++i) s += m_longsuperblock[i].bit_size();
+    return s;
 }
 
 }
